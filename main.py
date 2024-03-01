@@ -230,8 +230,9 @@ def save_to_file():
 
 
 async def startCheckingForChanges(_tokens):
-    for token in _tokens:
-        token.checkIfPriceChanged(time_frame={"minutes": 5}, min_price_change_percent=0.1)
+    while True:
+        for token in _tokens:
+            token.checkIfPriceChanged(time_frame={"minutes": 5}, min_price_change_percent=0.1)
 
 
 def start_fetching(_tokens):
