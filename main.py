@@ -97,7 +97,7 @@ class Token:
         return closest_entry
 
     def checkIfPriceChanged(self, time_frame, min_price_change_percent: float):
-        print(time_frame)
+        #print(time_frame)
         historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
         historic_price_timestamp = historic_price_obj.timestamp
@@ -268,6 +268,6 @@ async def addTokenToCheck(request: Request):
 if __name__ == "__main__":
     manager = multiprocessing.Manager()
     tokens: List[Token] = manager.list()
-    fetcher_process = Process(target=start_fetching, args=(tokens,))
-    fetcher_process.start()
+    #fetcher_process = Process(target=start_fetching, args=(tokens,))
+    #fetcher_process.start()
     uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
