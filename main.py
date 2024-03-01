@@ -55,7 +55,7 @@ class Token:
         self.price_history.append(PriceEntry(price=price, timestamp=_timestamp))
         self.checkIfPriceChanged(time_frame={"minutes": 5},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M)
-        print(len(self.price_history))
+        print(f"LEN INSIDE: {len(self.price_history)}")
 
     def getNearestPriceEntryToTimeframe(self, time_frame):
         # Parse current datetime
