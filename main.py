@@ -244,7 +244,8 @@ app = FastAPI()
 
 @app.post("/addTokenPrice/")
 async def addTokenToCheck(request: Request):
-    print(request.json())
+    json_data = await request.json()
+    print(json_data)
     return {"response": "ok"}
 
 
