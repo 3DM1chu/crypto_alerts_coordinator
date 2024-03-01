@@ -246,9 +246,7 @@ async def addTokenToCheck(request: Request):
     else:
         token_found = tokens[token_found_id]
 
-    with lock:
-        token_found.addPriceEntry(current_price, current_time)
-        token_found.addPriceEntry(current_price, current_time)
+    token_found.addPriceEntry(current_price, current_time)
 
     return {"response": "ok"}
 
