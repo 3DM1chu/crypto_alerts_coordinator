@@ -26,6 +26,8 @@ MINIMUM_PRICE_CHANGE_TO_ALERT_30D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_
 
 PORT_TO_RUN_UVICORN = int(config("PORT_TO_RUN_UVICORN"))
 
+lock = multiprocessing.Lock()
+
 
 class PriceEntry:
     def __init__(self, price: float, timestamp: datetime):
@@ -232,31 +234,32 @@ app = FastAPI()
 
 @app.post("/addTokenPrice/")
 async def addTokenToCheck(request: Request):
-    json_data = await request.json()
-    # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
-    coin_name = str(json_data["coin_name"])
-    current_price = float(json_data["current_price"])
-    current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
-    # Get the index of the token in the list
-    token_found_id = getIndexOfCoin(coin_name)
+    with lock:
+        json_data = await request.json()
+        # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
+        coin_name = str(json_data["coin_name"])
+        current_price = float(json_data["current_price"])
+        current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
+        # Get the index of the token in the list
+        token_found_id = getIndexOfCoin(coin_name)
 
-    if token_found_id == -1:
-        # Token not found, create a new one
-        token_found = Token(coin_name)
-        tokens.append(token_found)
-        print("New token added: " + coin_name)
-        # Update token_found_id after adding a new token
-        token_found_id = len(tokens) - 1
-    else:
-        token_found = tokens[token_found_id]
-        print("Token found: " + str(len(token_found.price_history)))
+        if token_found_id == -1:
+            # Token not found, create a new one
+            token_found = Token(coin_name)
+            tokens.append(token_found)
+            print("New token added: " + coin_name)
+            # Update token_found_id after adding a new token
+            token_found_id = len(tokens) - 1
+        else:
+            token_found = tokens[token_found_id]
+            print("Token found: " + str(len(token_found.price_history)))
 
-    print("ID: " + str(token_found_id))
-    tokens[token_found_id].addPriceEntry(current_price, current_time)
+        print("ID: " + str(token_found_id))
+        token_found.addPriceEntry(current_price, current_time)
 
-    #print(f"{coin_name} - {current_price} at {current_time}")
-    print(f"Tokens count: {len(tokens)}")
-    return {"response": "ok"}
+        #print(f"{coin_name} - {current_price} at {current_time}")
+        print(f"Tokens count: {len(tokens)}")
+        return {"response": "ok"}
 
 
 if __name__ == "__main__":
