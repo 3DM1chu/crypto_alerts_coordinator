@@ -278,7 +278,7 @@ async def addTokenToCheck(request: Request):
 if __name__ == "__main__":
     manager = multiprocessing.Manager()
     endpoints = manager.list()
-    tokens: List[Token] = []
+    tokens: List[Token] = loadTokensHistoryFromFile()
     save_to_file()
     fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
     fetcher_process.start()
