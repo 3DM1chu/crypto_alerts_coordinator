@@ -253,6 +253,7 @@ async def addTokenToCheck(request: Request):
     if token_found_id == -1:
         token_found = Token(coin_name)
         tokens.append(token_found)
+        print(f"Added new coin: {coin_name}, current price: {current_time} at {current_time}")
     else:
         token_found = tokens[token_found_id]
     token_found.addPriceEntry(current_price, current_time)
