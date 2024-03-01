@@ -259,6 +259,7 @@ async def addTokenToCheck(request: Request):
         token_found = tokens[token_found_id]
 
     token_found.addPriceEntry(current_price, current_time)
+    print(f"{coin_name} : {len(token_found.price_history)}")
 
     return {"response": "ok"}
 
