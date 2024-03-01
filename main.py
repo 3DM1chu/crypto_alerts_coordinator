@@ -246,7 +246,7 @@ app = FastAPI()
 async def addTokenToCheck(request: Request):
     json_data = await request.json()
     # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
-    print(json_data)
+    #print(json_data)
     coin_name = str(json_data["coin_name"])
     current_price = float(json_data["current_price"])
     current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
