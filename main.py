@@ -24,8 +24,6 @@ MINIMUM_PRICE_CHANGE_TO_ALERT_30D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_
 
 PORT_TO_RUN_UVICORN = int(config("PORT_TO_RUN_UVICORN"))
 
-lock = threading.Lock()
-
 
 class PriceEntry:
     def __init__(self, price: float, timestamp: datetime):
@@ -53,7 +51,22 @@ class Token:
         if self.getCurrentPrice() == price:
             return
         self.price_history.append(PriceEntry(price=price, timestamp=_timestamp))
-        print(f"LEN INSIDE: {len(self.price_history)}")
+        self.checkIfPriceChanged(time_frame={"minutes": 5},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M)
+        self.checkIfPriceChanged(time_frame={"minutes": 15},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M)
+        self.checkIfPriceChanged(time_frame={"hours": 1},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_1H)
+        self.checkIfPriceChanged(time_frame={"hours": 4},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_4H)
+        self.checkIfPriceChanged(time_frame={"hours": 8},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_8H)
+        self.checkIfPriceChanged(time_frame={"hours": 24},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
+        self.checkIfPriceChanged(time_frame={"days": 7},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
+        self.checkIfPriceChanged(time_frame={"days": 30},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
 
     def getNearestPriceEntryToTimeframe(self, time_frame):
         # Parse current datetime
@@ -83,7 +96,6 @@ class Token:
 
     def checkIfPriceChanged(self, time_frame, min_price_change_percent: float):
         # print(time_frame)
-        print(f"{self.symbol}: {len(self.price_history)}")
         historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
         historic_price_timestamp = historic_price_obj.timestamp
