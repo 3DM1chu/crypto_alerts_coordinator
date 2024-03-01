@@ -244,7 +244,8 @@ async def addTokenToCheck(request: Request):
     if token_found_id == -1:
         # Token not found, create a new one
         token_found = Token(coin_name)
-        tokens.append(token_found)
+        with lock:
+            tokens.append(token_found)
     else:
         token_found = tokens[token_found_id]
 
