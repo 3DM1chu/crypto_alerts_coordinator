@@ -234,6 +234,7 @@ async def startPollingEndpoints(_endpoints):
     while True:
         for endpoint in _endpoints:
             print(endpoint)
+        await asyncio.sleep(30)
 
 
 def setup_endpoints(_endpoints):
