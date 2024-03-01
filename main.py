@@ -233,12 +233,13 @@ def save_to_file():
 async def startPollingEndpoints(_endpoints):
     while True:
         for endpoint in _endpoints:
-            print(endpoint)
+            for token_in_endpoint in endpoint["tokens"]:
+                requests.put(endpoint + token_in_endpoint)
         await asyncio.sleep(30)
 
 
 def setup_endpoints(_endpoints):
-    _endpoints.append("http://frog01.mikr.us:21591/putToken/")
+    _endpoints.append({"url": "http://frog01.mikr.us:21591/putToken/", "tokens": ["BNB", "BTC", "TRU", "LINA"]})
     asyncio.run(startPollingEndpoints(_endpoints))
 
 
