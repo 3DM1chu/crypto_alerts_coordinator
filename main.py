@@ -191,6 +191,7 @@ def loadTokensHistoryFromFile():
             timestamp = datetime.strptime(price_history_entry["timestamp"], timestamp_format)
             token.price_history.append(PriceEntry(price_history_entry["price"], timestamp))
         tokens_to_return.append(token)
+    print(f"Loaded {len(tokens_to_return)} tokens")
     return tokens_to_return
 
 
