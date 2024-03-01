@@ -245,7 +245,19 @@ app = FastAPI()
 @app.post("/addTokenPrice/")
 async def addTokenToCheck(request: Request):
     json_data = await request.json()
-    print(json_data)
+    # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
+    coin_name = str(json_data["coin_name"])
+    current_price = float(json_data["current_price"])
+    current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
+    token_found_id = getIndexOfCoin(coin_name)
+    token_found = tokens[token_found_id]
+    if not token_found:
+        token_found = Token(coin_name)
+        tokens.append(token_found)
+    token_found.addPriceEntry(current_price, current_time)
+
+    print(f"{coin_name} - {current_price} at {current_time}")
+    print(f"Tokens count: {len(tokens)}")
     return {"response": "ok"}
 
 
