@@ -52,8 +52,7 @@ class Token:
     def addPriceEntry(self, price: float, _timestamp: datetime):
         if self.getCurrentPrice() == price:
             return
-        with lock:
-            self.price_history.append(PriceEntry(price=price, timestamp=_timestamp))
+        self.price_history.append(PriceEntry(price=price, timestamp=_timestamp))
         print(f"LEN INSIDE: {len(self.price_history)}")
 
     def getNearestPriceEntryToTimeframe(self, time_frame):
