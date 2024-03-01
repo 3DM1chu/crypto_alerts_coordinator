@@ -233,9 +233,9 @@ app = FastAPI()
 
 
 @app.post("/addTokenPrice/")
-async def addTokenToCheck(request: Request):
+def addTokenToCheck(request: Request):
     with lock:
-        json_data = await request.json()
+        json_data = asyncio.run(request.json())
         # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
         coin_name = str(json_data["coin_name"])
         current_price = float(json_data["current_price"])
@@ -265,6 +265,6 @@ async def addTokenToCheck(request: Request):
 if __name__ == "__main__":
     manager = multiprocessing.Manager()
     tokens: List[Token] = manager.list()
-    fetcher_process = Process(target=start_fetching, args=(tokens,))
-    fetcher_process.start()
+    #fetcher_process = Process(target=start_fetching, args=(tokens,))
+    #fetcher_process.start()
     uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
