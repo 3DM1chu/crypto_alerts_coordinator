@@ -3,14 +3,12 @@ import multiprocessing
 import os
 import threading
 from datetime import datetime, timedelta
-from multiprocessing import Process
 import requests
 import json
 import uvicorn
 from decouple import config
 from typing import List
 from fastapi import FastAPI, Request
-
 
 TELEGRAM_TOKEN = config("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID")
@@ -26,7 +24,7 @@ MINIMUM_PRICE_CHANGE_TO_ALERT_30D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_
 
 PORT_TO_RUN_UVICORN = int(config("PORT_TO_RUN_UVICORN"))
 
-lock = multiprocessing.Lock()
+lock = threading.Lock()
 
 
 class PriceEntry:
@@ -54,7 +52,8 @@ class Token:
     def addPriceEntry(self, price: float, _timestamp: datetime):
         if self.getCurrentPrice() == price:
             return
-        self.price_history.append(PriceEntry(price=price, timestamp=_timestamp))
+        with lock:
+            self.price_history.append(PriceEntry(price=price, timestamp=_timestamp))
         print(f"LEN INSIDE: {len(self.price_history)}")
 
     def getNearestPriceEntryToTimeframe(self, time_frame):
@@ -84,7 +83,7 @@ class Token:
         return closest_entry
 
     def checkIfPriceChanged(self, time_frame, min_price_change_percent: float):
-        #print(time_frame)
+        # print(time_frame)
         print(f"{self.symbol}: {len(self.price_history)}")
         historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
@@ -234,30 +233,30 @@ app = FastAPI()
 
 @app.post("/addTokenPrice/")
 def addTokenToCheck(request: Request):
-        json_data = asyncio.run(request.json())
-        # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
-        coin_name = str(json_data["coin_name"])
-        current_price = float(json_data["current_price"])
-        current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
-        # Get the index of the token in the list
-        token_found_id = getIndexOfCoin(coin_name)
+    json_data = asyncio.run(request.json())
+    # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
+    coin_name = str(json_data["coin_name"])
+    current_price = float(json_data["current_price"])
+    current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
+    # Get the index of the token in the list
+    token_found_id = getIndexOfCoin(coin_name)
 
-        if token_found_id == -1:
-            # Token not found, create a new one
-            token_found = Token(coin_name)
-            tokens.append(token_found)
-        else:
-            token_found = tokens[token_found_id]
+    if token_found_id == -1:
+        # Token not found, create a new one
+        token_found = Token(coin_name)
+        tokens.append(token_found)
+    else:
+        token_found = tokens[token_found_id]
 
-        with lock:
-            token_found.addPriceEntry(current_price, current_time)
+    with lock:
+        token_found.addPriceEntry(current_price, current_time)
 
-        return {"response": "ok"}
+    return {"response": "ok"}
 
 
 if __name__ == "__main__":
     manager = multiprocessing.Manager()
     tokens: List[Token] = manager.list()
-    #fetcher_process = Process(target=start_fetching, args=(tokens,))
-    #fetcher_process.start()
+    # fetcher_process = Process(target=start_fetching, args=(tokens,))
+    # fetcher_process.start()
     uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
