@@ -97,6 +97,7 @@ class Token:
         return closest_entry
 
     def checkIfPriceChanged(self, time_frame, min_price_change_percent: float):
+        print(time_frame)
         historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
         historic_price_timestamp = historic_price_obj.timestamp
