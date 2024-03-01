@@ -225,7 +225,7 @@ def getIndexOfCoin(coin_symbol: str):
 
 
 def save_to_file():
-    threading.Timer(60.0, save_to_file).start()  # Run every 30 seconds
+    threading.Timer(60.0, save_to_file).start()  # Run every 60 seconds
     saveTokensHistoryToFIle()
     print(f"Data saved to file at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
@@ -275,6 +275,7 @@ if __name__ == "__main__":
     manager = multiprocessing.Manager()
     endpoints = manager.list()
     tokens: List[Token] = []
+    save_to_file()
     fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
     fetcher_process.start()
     uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
