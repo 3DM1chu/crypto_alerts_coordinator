@@ -236,10 +236,10 @@ async def startPollingEndpoints(_endpoints):
             for token_in_endpoint in endpoint["tokens"]:
                 try:
                     requests.put(endpoint["url"] + token_in_endpoint)
-                    print("Connected to endpoint: " + endpoint["url"])
+                    # print("Connected to endpoint: " + endpoint["url"])
                 except:
                     x = ""
-        await asyncio.sleep(30)
+        await asyncio.sleep(120)
 
 
 def setup_endpoints(_endpoints):
