@@ -232,8 +232,8 @@ app = FastAPI()
 
 
 @app.post("/addTokenPrice/")
-def addTokenToCheck(request: Request):
-    json_data = asyncio.run(request.json())
+async def addTokenToCheck(request: Request):
+    json_data = await request.json()
     # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
     coin_name = str(json_data["coin_name"])
     current_price = float(json_data["current_price"])
@@ -248,8 +248,7 @@ def addTokenToCheck(request: Request):
     else:
         token_found = tokens[token_found_id]
 
-    with lock:
-        token_found.addPriceEntry(current_price, current_time)
+    token_found.addPriceEntry(current_price, current_time)
 
     return {"response": "ok"}
 
