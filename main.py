@@ -244,12 +244,12 @@ app = FastAPI()
 
 
 class TokenFromGrabber(BaseModel):
-    json: str
+    json_str: str
 
 
 @app.post("/addTokenPrice/")
 async def addTokenToCheck(token: TokenFromGrabber):
-    print(json.loads(token.json))
+    print(json.loads(token.json_str))
     return {"response": "ok"}
 
 
