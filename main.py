@@ -97,7 +97,7 @@ class Token:
         return closest_entry
 
     def checkIfPriceChanged(self, time_frame, min_price_change_percent: float):
-        #print(f"{self.getCurrentPrice()} | {len(self.price_history)}")
+        # print(f"{self.getCurrentPrice()} | {len(self.price_history)}")
         historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
         historic_price_timestamp = historic_price_obj.timestamp
@@ -236,13 +236,16 @@ async def startPollingEndpoints(_endpoints):
             for token_in_endpoint in endpoint["tokens"]:
                 try:
                     requests.put(endpoint["url"] + token_in_endpoint)
+                    print("Connected to endpoint: " + endpoint["url"])
                 except:
                     x = ""
         await asyncio.sleep(30)
 
 
 def setup_endpoints(_endpoints):
-    _endpoints.append({"url": "http://frog01.mikr.us:21591/putToken/", "tokens": ["BNB", "BTC", "TRU", "LINA"]})
+    coins_to_check = json.loads(open("coins.json", "r").read())
+    _endpoints.append({"url": "http://frog01.mikr.us:21591/putToken/", "tokens":
+                      [coin_from_file["symbol"] for coin_from_file in coins_to_check]})
     asyncio.run(startPollingEndpoints(_endpoints))
 
 
