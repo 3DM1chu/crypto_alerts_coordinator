@@ -249,7 +249,7 @@ class TokenFromGrabber(BaseModel):
 
 @app.post("/addTokenPrice/")
 async def addTokenToCheck(token: TokenFromGrabber):
-    print(json.loads(token.json_str))
+    print(token.json_str)
     return {"response": "ok"}
 
 
