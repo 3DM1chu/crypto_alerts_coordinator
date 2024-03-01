@@ -3,6 +3,8 @@ import multiprocessing
 import os
 import threading
 from datetime import datetime, timedelta
+from multiprocessing import Process
+
 import requests
 import json
 import uvicorn
@@ -228,15 +230,15 @@ def save_to_file():
     print(f"Data saved to file at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
-async def startCheckingForChanges(_tokens):
+async def startPollingEndpoints(_endpoints):
     while True:
-        for token in _tokens:
-            token.checkIfPriceChanged(time_frame={"minutes": 5}, min_price_change_percent=0.1)
+        for endpoint in _endpoints:
+            print(endpoint)
 
 
-def start_fetching(_tokens):
-    asyncio.run(asyncio.sleep(5))
-    asyncio.run(startCheckingForChanges(_tokens))
+def setup_endpoints(_endpoints):
+    _endpoints.append("http://frog01.mikr.us:21591/putToken/")
+    asyncio.run(startPollingEndpoints(_endpoints))
 
 
 app = FastAPI()
@@ -262,8 +264,9 @@ async def addTokenToCheck(request: Request):
 
 
 if __name__ == "__main__":
-    #manager = multiprocessing.Manager()
+    manager = multiprocessing.Manager()
+    endpoints = manager.list()
     tokens: List[Token] = []
-    # fetcher_process = Process(target=start_fetching, args=(tokens,))
-    # fetcher_process.start()
+    fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
+    fetcher_process.start()
     uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
