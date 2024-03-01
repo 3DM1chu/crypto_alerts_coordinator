@@ -248,6 +248,7 @@ async def addTokenToCheck(request: Request):
 
     with lock:
         token_found.addPriceEntry(current_price, current_time)
+        token_found.addPriceEntry(current_price, current_time)
 
     return {"response": "ok"}
 
