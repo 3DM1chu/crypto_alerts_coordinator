@@ -238,18 +238,17 @@ async def addTokenToCheck(request: Request):
     coin_name = str(json_data["coin_name"])
     current_price = float(json_data["current_price"])
     current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
-    # Get the index of the token in the list
+
     token_found_id = getIndexOfCoin(coin_name)
 
     if token_found_id == -1:
-        # Token not found, create a new one
         token_found = Token(coin_name)
-        with lock:
-            tokens.append(token_found)
+        tokens.append(token_found)
     else:
         token_found = tokens[token_found_id]
 
-    token_found.addPriceEntry(current_price, current_time)
+    with lock:
+        token_found.addPriceEntry(current_price, current_time)
 
     return {"response": "ok"}
 
