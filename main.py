@@ -212,7 +212,11 @@ def saveTokensHistoryToFIle():
                 tokens_symbols.append(token.symbol)
         if not token_already_existing:
             tokens_json.append(token_json)
-    open("prices.json", "w").write(json.dumps(tokens_json, indent=4))
+    try:
+        data_to_save = json.dumps(tokens_json, indent=4)
+        open("prices.json", "w").write(data_to_save)
+    except:
+        print("Could not save prices.json not doing it...")
 
 
 def getIndexOfCoin(coin_symbol: str):
