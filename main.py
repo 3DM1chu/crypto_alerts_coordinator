@@ -9,8 +9,7 @@ import json
 import uvicorn
 from decouple import config
 from typing import List
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
 
 
 TELEGRAM_TOKEN = config("TELEGRAM_TOKEN")
@@ -243,13 +242,9 @@ def start_fetching(_tokens):
 app = FastAPI()
 
 
-class TokenFromGrabber(BaseModel):
-    json_str: str
-
-
 @app.post("/addTokenPrice/")
-async def addTokenToCheck(token: TokenFromGrabber):
-    print(token.json_str)
+async def addTokenToCheck(request: Request):
+    print(request.json())
     return {"response": "ok"}
 
 
