@@ -254,8 +254,8 @@ async def addTokenToCheck(request: Request):
 
 
 if __name__ == "__main__":
-    manager = multiprocessing.Manager()
-    tokens: List[Token] = manager.list()
+    #manager = multiprocessing.Manager()
+    tokens: List[Token] = []
     # fetcher_process = Process(target=start_fetching, args=(tokens,))
     # fetcher_process.start()
     uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
