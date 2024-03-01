@@ -244,6 +244,9 @@ async def addTokenToCheck(request: Request):
         token_found = Token(coin_name)
         tokens.append(token_found)
         print("New token added: " + coin_name)
+    else:
+        token_found = tokens[token_found_id]
+        print("Token found: " + str(len(token_found.price_history)))
     token_found_id = getIndexOfCoin(coin_name)
     tokens[token_found_id].addPriceEntry(current_price, current_time)
 
