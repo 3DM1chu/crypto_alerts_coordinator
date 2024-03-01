@@ -244,7 +244,7 @@ app = FastAPI()
 
 
 class TokenFromGrabber(BaseModel):
-    json: {}
+    json: str
 
 
 @app.post("/addTokenPrice/")
