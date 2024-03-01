@@ -258,8 +258,8 @@ async def addTokenToCheck(request: Request):
     token_found = tokens[token_found_id]
     token_found.addPriceEntry(current_price, current_time)
 
-    print(f"{coin_name} - {current_price} at {current_time}")
-    print(f"Tokens count: {len(tokens)}")
+    #print(f"{coin_name} - {current_price} at {current_time}")
+    #print(f"Tokens count: {len(tokens)}")
     return {"response": "ok"}
 
 
