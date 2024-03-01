@@ -53,22 +53,6 @@ class Token:
         if self.getCurrentPrice() == price:
             return
         self.price_history.append(PriceEntry(price=price, timestamp=_timestamp))
-        self.checkIfPriceChanged(time_frame={"minutes": 5},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M)
-        self.checkIfPriceChanged(time_frame={"minutes": 15},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M)
-        self.checkIfPriceChanged(time_frame={"hours": 1},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_1H)
-        self.checkIfPriceChanged(time_frame={"hours": 4},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_4H)
-        self.checkIfPriceChanged(time_frame={"hours": 8},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_8H)
-        self.checkIfPriceChanged(time_frame={"hours": 24},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
-        self.checkIfPriceChanged(time_frame={"days": 7},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
-        self.checkIfPriceChanged(time_frame={"days": 30},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
 
     def getNearestPriceEntryToTimeframe(self, time_frame):
         # Parse current datetime
@@ -249,7 +233,6 @@ app = FastAPI()
 async def addTokenToCheck(request: Request):
     json_data = await request.json()
     # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
-    #print(json_data)
     coin_name = str(json_data["coin_name"])
     current_price = float(json_data["current_price"])
     current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
@@ -262,7 +245,7 @@ async def addTokenToCheck(request: Request):
     token_found.addPriceEntry(current_price, current_time)
 
     #print(f"{coin_name} - {current_price} at {current_time}")
-    #print(f"Tokens count: {len(tokens)}")
+    print(f"Tokens count: {len(tokens)}")
     return {"response": "ok"}
 
 
