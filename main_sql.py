@@ -275,6 +275,7 @@ if __name__ == "__main__":
         session = sessionmaker(bind=engine)()
 
     tokens: List[Token] = session.query(Token).all()
+    print(f"Loaded {len(tokens)} tokens")
 
     manager = multiprocessing.Manager()
     endpoints = manager.list()
