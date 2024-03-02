@@ -2,9 +2,10 @@ import asyncio
 import json
 import multiprocessing
 import os.path
-from datetime import datetime, timedelta, time
+import time
+from datetime import datetime, timedelta
 from multiprocessing import Process
-from typing import List, Set
+from typing import Set
 import requests
 import uvicorn
 from decouple import config
@@ -45,7 +46,7 @@ class TokenPrice(BaseModel):
     __tablename__ = "token_prices"
 
     token_id: Mapped[int] = mapped_column(Integer, ForeignKey("tokens.id"))
-    #token: Mapped[Token] = relationship(back_populates="token_prices")
+    # token: Mapped[Token] = relationship(back_populates="token_prices")
     price = Column(Float)
     datetime = Column(String)
 
@@ -64,8 +65,12 @@ class Token(BaseModel):
         if not self.token_prices:
             return 0.0
 
+        start_time = time.time()
         last, _ = self.getNearestPriceEntryToTimeframe(time_frame={"minutes": 1})
         print(last.datetime)
+        end_time = time.time()
+        time_taken_ms = (end_time - start_time) * 1000
+        print("Time taken:", time_taken_ms, "seconds")
         return last.price if last is not None else 0.0
 
     def addPriceEntry(self, price: float, _datetime: datetime):
