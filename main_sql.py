@@ -1,16 +1,17 @@
+import asyncio
 import json
 import multiprocessing
-import os
-from datetime import datetime, timedelta
+import os.path
+import threading
+from datetime import datetime, timedelta, time
+from multiprocessing import Process
 from typing import List
-
 import requests
+import uvicorn
 from decouple import config
+from fastapi import FastAPI, Request
 from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import declarative_base, mapped_column, relationship, Mapped, sessionmaker
-
-engine = create_engine("sqlite:///database.db")
-Base = declarative_base()
 
 TELEGRAM_TOKEN = config("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID")
@@ -25,6 +26,8 @@ MINIMUM_PRICE_CHANGE_TO_ALERT_7D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_7
 MINIMUM_PRICE_CHANGE_TO_ALERT_30D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_30D"))
 
 PORT_TO_RUN_UVICORN = int(config("PORT_TO_RUN_UVICORN"))
+
+Base = declarative_base()
 
 
 def sendTelegramNotification(notification: str):
@@ -43,7 +46,7 @@ class TokenPrice(BaseModel):
     __tablename__ = "token_prices"
 
     token_id: Mapped[int] = mapped_column(Integer, ForeignKey("tokens.id"))
-    token: Mapped["Token"] = relationship(back_populates="token_prices")
+    #token: Mapped[Token] = relationship(back_populates="token_prices")
     price = Column(Float)
     datetime = Column(String)
 
@@ -56,7 +59,7 @@ class Token(BaseModel):
 
     symbol = Column(String)
     currency = Column(String, default="USD")
-    token_prices: Mapped[List["TokenPrice"]] = relationship()
+    token_prices: Mapped[List[TokenPrice]] = relationship()
 
     def getCurrentPrice(self):
         if len(self.price_history) == 0:
@@ -71,7 +74,9 @@ class Token(BaseModel):
     def addPriceEntry(self, price: float, _timestamp: datetime):
         if self.getCurrentPrice() == price:
             return
-        self.price_history.append(TokenPrice(price=price, timestamp=_timestamp))
+        new_token_price = TokenPrice(price=price, timestamp=_timestamp)
+        self.price_history.append(new_token_price)
+        session.add(new_token_price)
         self.checkIfPriceChanged(time_frame={"minutes": 5},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M)
         self.checkIfPriceChanged(time_frame={"minutes": 15},
@@ -182,29 +187,6 @@ class Token(BaseModel):
         return result
 
 
-def migrateJSONtoDB(session):
-    if not os.path.exists("prices.json"):
-        file = open("prices.json", 'w')
-        file.write("[]")
-        file.close()
-    _tokens: [] = json.loads(open("prices.json", "r").read())
-    for token_from_file in _tokens:
-        __token = Token(symbol=token_from_file["symbol"])
-        __token.currency = token_from_file["currency"]
-        for price_history_entry in token_from_file["price_history"]:
-            timestamp = price_history_entry["datetime"]
-            __token.token_prices.append(TokenPrice(price=price_history_entry["price"], datetime=timestamp))
-        session.add(__token)
-        session.commit()
-
-
-Base.metadata.create_all(engine)
-
-
-session = sessionmaker(bind=engine)()
-migrateJSONtoDB(session)
-
-
 def getIndexOfCoin(coin_symbol: str):
     id: int = 0
     for entry in tokens:
@@ -212,12 +194,6 @@ def getIndexOfCoin(coin_symbol: str):
             return id
         id += 1
     return -1
-
-
-def save_to_file():
-    threading.Timer(60.0, save_to_file).start()  # Run every 60 seconds
-    saveTokensHistoryToFIle()
-    print(f"Data saved to file at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 
 async def startPollingEndpoints(_endpoints):
@@ -242,7 +218,7 @@ def setup_endpoints(_endpoints):
 app = FastAPI()
 
 
-@app.post("/addTokenPrice/")
+@app.post("/addTokenPrice")
 async def addTokenToCheck(request: Request):
     json_data = await request.json()
     # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
@@ -252,6 +228,7 @@ async def addTokenToCheck(request: Request):
     token_found_id = getIndexOfCoin(coin_name)
     if token_found_id == -1:
         token_found = Token(coin_name)
+        session.add(token_found)
         tokens.append(token_found)
         print(f"Added new coin: {coin_name}, current price: {current_time} at {current_time}")
     else:
@@ -261,11 +238,44 @@ async def addTokenToCheck(request: Request):
     return {"response": "ok"}
 
 
+def migrateJSONtoDB():
+    if not os.path.exists("prices.json"):
+        file = open("prices.json", 'w')
+        file.write("[]")
+        file.close()
+    _tokens: [] = json.loads(open("prices.json", "r").read())
+    for token_from_file in _tokens:
+        __token = Token(symbol=token_from_file["symbol"])
+        __token.currency = token_from_file["currency"]
+        for price_history_entry in token_from_file["price_history"]:
+            timestamp = price_history_entry["datetime"]
+            __token.token_prices.append(TokenPrice(price=price_history_entry["price"], datetime=timestamp))
+        session.add(__token)
+        session.commit()
+
+
 if __name__ == "__main__":
+    if not os.path.exists("database.db"):
+        # Migrate from json
+        engine = create_engine("sqlite:///database.db")
+        Base.metadata.create_all(engine)
+        session = sessionmaker(bind=engine)()
+
+        print("Starting to migrate from JSON to SQLite")
+        time_start = datetime.now()
+        migrateJSONtoDB()
+        time_end = datetime.now()
+        print(f"Migrating completed... Took {time_end - time_start}")
+    else:
+        engine = create_engine("sqlite:///database.db")
+        Base.metadata.create_all(engine)
+        session = sessionmaker(bind=engine)()
+
+    tokens: List[Token] = session.query(Token).all()
+
     manager = multiprocessing.Manager()
     endpoints = manager.list()
-    tokens: List[Token] = session.query(Token).all()
-    save_to_file()
     fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
     fetcher_process.start()
+
     uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
