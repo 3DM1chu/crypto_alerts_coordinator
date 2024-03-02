@@ -68,7 +68,7 @@ class Token(BaseModel):
         for price in self.token_prices:
             last = price
 
-        return last if last is not None else 0.0
+        return last.price if last is not None else 0.0
 
     def addPriceEntry(self, price: float, _datetime: datetime):
         if self.getCurrentPrice() == price:
