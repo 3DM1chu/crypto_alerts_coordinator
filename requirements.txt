@@ -8,3 +8,5 @@ python-decouple
 aiohttp
 uvicorn
 fastapi
+sqlalchemy
+sqlalchemy[mypy]
