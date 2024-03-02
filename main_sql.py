@@ -248,7 +248,10 @@ def migrateJSONtoDB():
         __token = Token(symbol=token_from_file["symbol"])
         __token.currency = token_from_file["currency"]
         for price_history_entry in token_from_file["price_history"]:
-            timestamp = price_history_entry["datetime"]
+            try:
+                timestamp = price_history_entry["datetime"]
+            except:
+                timestamp = price_history_entry["timestamp"]
             __token.token_prices.append(TokenPrice(price=price_history_entry["price"], datetime=timestamp))
         session.add(__token)
         session.commit()
