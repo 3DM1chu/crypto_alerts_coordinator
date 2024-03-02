@@ -130,8 +130,7 @@ class Token(BaseModel):
         # print(f"{self.getCurrentPrice()} | {len(self.price_history)}")
         historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
-        historic_price_timestamp = (datetime.strptime(historic_price_obj.datetime, '%Y-%m-%d %H:%M:%S')
-                                    + timedelta(hours=1))
+        historic_price_timestamp = historic_price_obj.datetime + timedelta(hours=1)
 
         ATH_ATL = self.checkIfPriceWasATHorATL(time_frame, _current_price)
         wasATH = ATH_ATL["wasATH"]
