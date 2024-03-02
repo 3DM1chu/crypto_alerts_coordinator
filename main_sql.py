@@ -227,7 +227,7 @@ async def addTokenToCheck(request: Request):
     current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
     token_found_id = getIndexOfCoin(coin_name)
     if token_found_id == -1:
-        token_found = Token(coin_name)
+        token_found = Token(symbol=coin_name)
         session.add(token_found)
         tokens.append(token_found)
         print(f"Added new coin: {coin_name}, current price: {current_time} at {current_time}")
