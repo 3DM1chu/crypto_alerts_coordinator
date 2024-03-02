@@ -75,6 +75,7 @@ class Token(BaseModel):
         new_token_price = TokenPrice(price=price, datetime=_datetime)
         self.token_prices.add(new_token_price)
         session.add(new_token_price)
+        session.commit()
         self.checkIfPriceChanged(time_frame={"minutes": 5},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M,
                                  _current_price=price, _current_datetime=_datetime)
@@ -236,6 +237,7 @@ async def addTokenToCheck(request: Request):
         session.add(token_found)
         tokens.add(token_found)
         print(f"Added new token: {symbol}, current price: {current_time} at {current_time}")
+        session.commit()
     token_found.addPriceEntry(current_price, current_time)
     return {"response": "ok"}
 
