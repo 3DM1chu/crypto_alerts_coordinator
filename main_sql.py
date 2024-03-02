@@ -71,10 +71,10 @@ class Token(BaseModel):
             return datetime.now()
         return self.token_prices[-1]
 
-    def addPriceEntry(self, price: float, _timestamp: datetime):
+    def addPriceEntry(self, price: float, _datetime: datetime):
         if self.getCurrentPrice() == price:
             return
-        new_token_price = TokenPrice(price=price, timestamp=_timestamp)
+        new_token_price = TokenPrice(price=price, datetime=_datetime)
         self.token_prices.append(new_token_price)
         session.add(new_token_price)
         self.checkIfPriceChanged(time_frame={"minutes": 5},
@@ -178,7 +178,7 @@ class Token(BaseModel):
         # Iterate over price history
         for entry in self.token_prices:
             # Check if the timestamp is within the time threshold
-            if datetime.now() - entry.timestamp < time_threshold:
+            if datetime.now() - entry.datetime < time_threshold:
                 # Check if the price has changed
                 if entry.price > self.getCurrentPrice():
                     result["wasATH"] = False
@@ -268,7 +268,7 @@ if __name__ == "__main__":
         time_start = datetime.now()
         migrateJSONtoDB()
         time_end = datetime.now()
-        print(f"Migrating completed... Took {time_end - time_start}")
+        print(f"Migration completed... Took {time_end - time_start}")
     else:
         engine = create_engine("sqlite:///database.db")
         Base.metadata.create_all(engine)
