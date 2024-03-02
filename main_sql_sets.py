@@ -61,14 +61,14 @@ class Token(BaseModel):
     token_prices: Mapped[Set[TokenPrice]] = relationship()
 
     def getCurrentPrice(self):
-        if len(self.token_prices) == 0:
+        if not self.token_prices:
             return 0.0
-        return self.token_prices[-1].price
 
-    def getCurrentPriceDatetime(self):
-        if len(self.token_prices) == 0:
-            return datetime.now()
-        return self.token_prices[-1]
+        last = None
+        for price in self.token_prices:
+            last = price
+
+        return last if last is not None else 0.0
 
     def addPriceEntry(self, price: float, _datetime: datetime):
         if self.getCurrentPrice() == price:
