@@ -76,21 +76,29 @@ class Token(BaseModel):
         self.token_prices.add(new_token_price)
         session.add(new_token_price)
         self.checkIfPriceChanged(time_frame={"minutes": 5},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"minutes": 15},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"hours": 1},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_1H)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_1H,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"hours": 4},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_4H)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_4H,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"hours": 8},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_8H)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_8H,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"hours": 24},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"days": 7},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_7D,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"days": 30},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H)
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_30D,
+                                 _current_price=price, _current_datetime=_datetime)
 
     def getNearestPriceEntryToTimeframe(self, time_frame):
         # Parse current datetime
@@ -116,49 +124,49 @@ class Token(BaseModel):
                 closest_entry = entry
                 closest_difference = time_difference
 
-        return closest_entry, reference_time
+        return closest_entry
 
-    def checkIfPriceChanged(self, time_frame, min_price_change_percent: float):
+    def checkIfPriceChanged(self, time_frame, min_price_change_percent: float, _current_price, _current_datetime):
         # print(f"{self.getCurrentPrice()} | {len(self.price_history)}")
-        historic_price_obj, reference_time = self.getNearestPriceEntryToTimeframe(time_frame)
+        historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
         historic_price_timestamp = historic_price_obj.datetime
 
         ATH_ATL = self.checkIfPriceWasATHorATL(time_frame)
         wasATH = ATH_ATL["wasATH"]
         wasATL = ATH_ATL["wasATL"]
-        if self.getCurrentPrice() > historic_price and wasATH:
+        if _current_price > historic_price and wasATH:
             price_change = (self.getCurrentPrice() / historic_price * 100) - 100
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
                             f"ATH in {time_frame}\n"
                             f"📗{price_change}%\n"
-                            f"{historic_price} => {self.getCurrentPrice()}$\n"
-                            f"{historic_price_timestamp} | {reference_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"{historic_price} => {_current_price}$\n"
+                            f"{historic_price_timestamp} | {_current_datetime}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification)
-        elif self.getCurrentPrice() < historic_price and wasATL:
-            price_change = 100 - (self.getCurrentPrice() / historic_price * 100)
+        elif _current_price < historic_price and wasATL:
+            price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
                             f"ATL in {time_frame}\n"
                             f"📉{price_change}%\n"
-                            f"{historic_price} => {self.getCurrentPrice()}$\n"
-                            f"{historic_price_timestamp} | {reference_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"{historic_price} => {_current_price}$\n"
+                            f"{historic_price_timestamp} | {_current_datetime}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification)
         else:
-            price_change = 100 - (self.getCurrentPrice() / historic_price * 100)
+            price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
                             f"📉{price_change}%\n"
-                            f"{historic_price} => {self.getCurrentPrice()}$\n"
-                            f"{historic_price_timestamp} | {reference_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                            f"{historic_price} => {_current_price}$\n"
+                            f"{historic_price_timestamp} | {_current_datetime}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
                 print(notification)
