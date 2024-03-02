@@ -178,7 +178,7 @@ class Token(BaseModel):
         # Iterate over price history
         for entry in self.token_prices:
             # Check if the timestamp is within the time threshold
-            if datetime.now() - entry.datetime < time_threshold:
+            if datetime.now() - entry.getDateTime() < time_threshold:
                 # Check if the price has changed
                 if entry.price > self.getCurrentPrice():
                     result["wasATH"] = False
