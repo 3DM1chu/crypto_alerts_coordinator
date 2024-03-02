@@ -65,6 +65,7 @@ class Token(BaseModel):
             return 0.0
 
         last, _ = self.getNearestPriceEntryToTimeframe(time_frame={"minutes": 1})
+        print(last.datetime)
         return last.price if last is not None else 0.0
 
     def addPriceEntry(self, price: float, _datetime: datetime):
