@@ -67,7 +67,7 @@ class Token(BaseModel):
         last = None
         for price in self.token_prices:
             last = price
-
+        print(last.datetime.strftime('%Y-%m-%d %H:%M:%S'))
         return last.price if last is not None else 0.0
 
     def addPriceEntry(self, price: float, _datetime: datetime):
