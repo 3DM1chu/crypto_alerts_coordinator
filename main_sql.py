@@ -62,20 +62,20 @@ class Token(BaseModel):
     token_prices: Mapped[List[TokenPrice]] = relationship()
 
     def getCurrentPrice(self):
-        if len(self.price_history) == 0:
+        if len(self.token_prices) == 0:
             return 0.0
-        return self.price_history[-1].price
+        return self.token_prices[-1].price
 
     def getCurrentPriceDatetime(self):
-        if len(self.price_history) == 0:
+        if len(self.token_prices) == 0:
             return datetime.now()
-        return self.price_history[-1]
+        return self.token_prices[-1]
 
     def addPriceEntry(self, price: float, _timestamp: datetime):
         if self.getCurrentPrice() == price:
             return
         new_token_price = TokenPrice(price=price, timestamp=_timestamp)
-        self.price_history.append(new_token_price)
+        self.token_prices.append(new_token_price)
         session.add(new_token_price)
         self.checkIfPriceChanged(time_frame={"minutes": 5},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M)
@@ -109,7 +109,7 @@ class Token(BaseModel):
         reference_time = current_datetime - time_delta
 
         # Iterate through each entry in price history
-        for entry in self.price_history:
+        for entry in self.token_prices:
             # Calculate the difference between the timestamp and the current time
             time_difference = abs(entry.timestamp - reference_time)
 
@@ -176,7 +176,7 @@ class Token(BaseModel):
         }
 
         # Iterate over price history
-        for entry in self.price_history:
+        for entry in self.token_prices:
             # Check if the timestamp is within the time threshold
             if datetime.now() - entry.timestamp < time_threshold:
                 # Check if the price has changed
