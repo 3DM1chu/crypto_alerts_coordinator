@@ -132,7 +132,7 @@ class Token(BaseModel):
             notification = (f"======================\n"
                             f"{self.symbol}\n"
                             f"ATH in {time_frame}\n"
-                            f"📉{price_change}%\n"
+                            f"📗{price_change}%\n"
                             f"{historic_price} => {self.getCurrentPrice()}$\n"
                             f"{historic_price_timestamp} | {reference_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"======================")
