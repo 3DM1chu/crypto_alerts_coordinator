@@ -111,7 +111,7 @@ class Token(BaseModel):
         # Iterate through each entry in price history
         for entry in self.token_prices:
             # Calculate the difference between the timestamp and the current time
-            time_difference = abs(entry.timestamp - reference_time)
+            time_difference = abs(entry.datetime - reference_time)
 
             # Check if the current entry is closer than the current closest entry
             if time_difference < closest_difference:
@@ -124,7 +124,7 @@ class Token(BaseModel):
         # print(f"{self.getCurrentPrice()} | {len(self.price_history)}")
         historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
-        historic_price_timestamp = historic_price_obj.timestamp
+        historic_price_timestamp = historic_price_obj.datetime
 
         ATH_ATL = self.checkIfPriceWasATHorATL(time_frame)
         wasATH = ATH_ATL["wasATH"]
