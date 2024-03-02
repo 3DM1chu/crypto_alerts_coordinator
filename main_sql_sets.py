@@ -117,11 +117,11 @@ class Token(BaseModel):
                 closest_entry = entry
                 closest_difference = time_difference
 
-        return closest_entry
+        return closest_entry, reference_time
 
     def checkIfPriceChanged(self, time_frame, min_price_change_percent: float):
         # print(f"{self.getCurrentPrice()} | {len(self.price_history)}")
-        historic_price_obj = self.getNearestPriceEntryToTimeframe(time_frame)
+        historic_price_obj, reference_time = self.getNearestPriceEntryToTimeframe(time_frame)
         historic_price = historic_price_obj.price
         historic_price_timestamp = historic_price_obj.datetime
 
@@ -133,10 +133,10 @@ class Token(BaseModel):
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
-                            f"💹{price_change}%\n"
-                            f"{self.getCurrentPrice()}$\n"
                             f"ATH in {time_frame}\n"
-                            f"since {historic_price_timestamp}\n"
+                            f"📉{price_change}%\n"
+                            f"{historic_price} => {self.getCurrentPrice()}$\n"
+                            f"{historic_price_timestamp} | {reference_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification)
@@ -145,10 +145,10 @@ class Token(BaseModel):
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
-                            f"📉{price_change}%\n"
-                            f"{self.getCurrentPrice()}$\n"
                             f"ATL in {time_frame}\n"
-                            f"since {historic_price_timestamp}\n"
+                            f"📉{price_change}%\n"
+                            f"{historic_price} => {self.getCurrentPrice()}$\n"
+                            f"{historic_price_timestamp} | {reference_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification)
@@ -158,9 +158,8 @@ class Token(BaseModel):
             notification = (f"======================\n"
                             f"{self.symbol}\n"
                             f"📉{price_change}%\n"
-                            f"{self.getCurrentPrice()}$\n"
-                            f"timeframe: {time_frame}\n"
-                            f"since {historic_price_timestamp}\n"
+                            f"{historic_price} => {self.getCurrentPrice()}$\n"
+                            f"{historic_price_timestamp} | {reference_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
                 print(notification)
