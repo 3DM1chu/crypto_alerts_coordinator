@@ -132,11 +132,11 @@ class Token(BaseModel):
         historic_price = historic_price_obj.price
         historic_price_timestamp = historic_price_obj.datetime
 
-        ATH_ATL = self.checkIfPriceWasATHorATL(time_frame)
+        ATH_ATL = self.checkIfPriceWasATHorATL(time_frame, _current_price)
         wasATH = ATH_ATL["wasATH"]
         wasATL = ATH_ATL["wasATL"]
         if _current_price > historic_price and wasATH:
-            price_change = (self.getCurrentPrice() / historic_price * 100) - 100
+            price_change = (_current_price / historic_price * 100) - 100
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
@@ -171,7 +171,7 @@ class Token(BaseModel):
             if price_change >= min_price_change_percent:
                 print(notification)
 
-    def checkIfPriceWasATHorATL(self, time_delta):
+    def checkIfPriceWasATHorATL(self, time_delta, _current_price):
         # Define the time threshold (1 hour)
         time_threshold = timedelta(**time_delta)
 
@@ -185,9 +185,9 @@ class Token(BaseModel):
             # Check if the timestamp is within the time threshold
             if datetime.now() - entry.getDateTime() < time_threshold:
                 # Check if the price has changed
-                if entry.price > self.getCurrentPrice():
+                if entry.price > _current_price:
                     result["wasATH"] = False
-                elif entry.price < self.getCurrentPrice():
+                elif entry.price < _current_price:
                     result["wasATL"] = False
         return result
 
