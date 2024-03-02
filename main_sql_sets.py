@@ -4,7 +4,7 @@ import multiprocessing
 import os.path
 from datetime import datetime, timedelta, time
 from multiprocessing import Process
-from typing import List
+from typing import List, Set
 import requests
 import uvicorn
 from decouple import config
@@ -58,7 +58,7 @@ class Token(BaseModel):
 
     symbol = Column(String)
     currency = Column(String, default="USD")
-    token_prices: Mapped[List[TokenPrice]] = relationship()
+    token_prices: Mapped[Set[TokenPrice]] = relationship()
 
     def getCurrentPrice(self):
         if len(self.token_prices) == 0:
@@ -186,13 +186,13 @@ class Token(BaseModel):
         return result
 
 
-def getIndexOfCoin(coin_symbol: str):
-    id: int = 0
+def findToken(symbol: str):
+    _id: int = 0
     for entry in tokens:
-        if entry.symbol == coin_symbol:
-            return id
-        id += 1
-    return -1
+        if entry.symbol == symbol:
+            return entry, _id
+        _id += 1
+    return None, -1
 
 
 async def startPollingEndpoints(_endpoints):
@@ -207,7 +207,7 @@ async def startPollingEndpoints(_endpoints):
         await asyncio.sleep(120)
 
 
-def setup_endpoints(_endpoints):
+def setup_endpoints(_endpoints: list):
     coins_to_check = json.loads(open("coins.json", "r").read())
     _endpoints.append({"url": "http://frog01.mikr.us:21591/putToken/", "tokens":
                       [coin_from_file["symbol"] for coin_from_file in coins_to_check]})
@@ -221,19 +221,16 @@ app = FastAPI()
 async def addTokenToCheck(request: Request):
     json_data = await request.json()
     # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
-    coin_name = str(json_data["coin_name"])
+    symbol = str(json_data["symbol"])
     current_price = float(json_data["current_price"])
     current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
-    token_found_id = getIndexOfCoin(coin_name)
-    if token_found_id == -1:
-        token_found = Token(symbol=coin_name)
+    token_found, _ = findToken(symbol)
+    if token_found is None:
+        token_found = Token(symbol=symbol)
         session.add(token_found)
-        tokens.append(token_found)
-        print(f"Added new coin: {coin_name}, current price: {current_time} at {current_time}")
-    else:
-        token_found = tokens[token_found_id]
+        tokens.add(token_found)
+        print(f"Added new token: {symbol}, current price: {current_time} at {current_time}")
     token_found.addPriceEntry(current_price, current_time)
-
     return {"response": "ok"}
 
 
@@ -273,7 +270,7 @@ if __name__ == "__main__":
         Base.metadata.create_all(engine)
         session = sessionmaker(bind=engine)()
 
-    tokens: List[Token] = session.query(Token).all()
+    tokens: Set[Token] = set(session.query(Token).all())
     print(f"Loaded {len(tokens)} tokens")
 
     manager = multiprocessing.Manager()
