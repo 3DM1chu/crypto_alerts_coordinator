@@ -74,7 +74,7 @@ class Token(BaseModel):
         if self.getCurrentPrice() == price:
             return
         new_token_price = TokenPrice(price=price, datetime=_datetime)
-        self.token_prices.append(new_token_price)
+        self.token_prices.add(new_token_price)
         session.add(new_token_price)
         self.checkIfPriceChanged(time_frame={"minutes": 5},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_5M)
@@ -248,7 +248,7 @@ def migrateJSONtoDB():
                 timestamp = price_history_entry["datetime"]
             except:
                 timestamp = price_history_entry["timestamp"]
-            __token.token_prices.append(TokenPrice(price=price_history_entry["price"], datetime=timestamp))
+            __token.token_prices.add(TokenPrice(price=price_history_entry["price"], datetime=timestamp))
         session.add(__token)
         session.commit()
 
