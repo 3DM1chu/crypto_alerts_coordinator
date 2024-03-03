@@ -292,11 +292,11 @@ if __name__ == "__main__":
     conn = redis.from_url("redis://localhost:6379")
 
     q = Queue(connection=Redis())
-    result = q.enqueue(count_words_at_url, 'http://nvie.com', on_success=print("DONE"),)
+    result = q.enqueue(count_words_at_url, 'http://nvie.com')
 
     manager = multiprocessing.Manager()
     endpoints = manager.list()
     fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
     fetcher_process.start()
 
-    uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
