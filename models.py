@@ -134,9 +134,9 @@ class Token(BaseModel):
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
+                            f"{historic_price} => {_current_price}$\n"
                             f"ATH in {time_frame}\n"
                             f"📗{price_change}%\n"
-                            f"{historic_price} => {_current_price}$\n"
                             f"{historic_price_timestamp} | {_current_datetime}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
@@ -146,9 +146,9 @@ class Token(BaseModel):
             price_change = float("{:.3f}".format(price_change))
             notification = (f"======================\n"
                             f"{self.symbol}\n"
+                            f"{historic_price} => {_current_price}$\n"
                             f"ATL in {time_frame}\n"
                             f"📉{price_change}%\n"
-                            f"{historic_price} => {_current_price}$\n"
                             f"{historic_price_timestamp} | {_current_datetime}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
