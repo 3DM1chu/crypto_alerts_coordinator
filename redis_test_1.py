@@ -10,7 +10,7 @@ def count_words_at_url(url):
     file_name = f"{bro_datetime_str}.txt"
 
     with open(file_name, 'w') as file:
-        file.write(str(json.dumps(main.tokens)))
+        file.write(str(json.dumps(main.repo.tokens)))
 
     sleep(15)
 
@@ -18,6 +18,6 @@ def count_words_at_url(url):
     file_name = f"{bro_datetime_str}.txt"
 
     with open(file_name, 'w') as file:
-        file.write(str(json.dumps(main.tokens)))
+        file.write(str(json.dumps(main.repo.tokens)))
 
     return url
