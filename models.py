@@ -2,11 +2,10 @@ import os
 from datetime import datetime, timedelta
 from typing import Set
 import orjson as json
+import requests
 from decouple import config
 from sqlalchemy import Column, Integer, ForeignKey, Float, String, create_engine
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship, sessionmaker
-
-from main import sendTelegramNotification
 
 MINIMUM_PRICE_CHANGE_TO_ALERT_5M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_5M"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_15M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_15M"))
@@ -17,7 +16,15 @@ MINIMUM_PRICE_CHANGE_TO_ALERT_24H = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_
 MINIMUM_PRICE_CHANGE_TO_ALERT_7D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_7D"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_30D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_30D"))
 
+TELEGRAM_TOKEN = str(config("TELEGRAM_TOKEN"))
+TELEGRAM_CHAT_ID = str(config("TELEGRAM_CHAT_ID"))
+
 Base = declarative_base()
+
+
+def sendTelegramNotification(notification: str):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
+    requests.get(url).json()
 
 
 class BaseModel(Base):

@@ -14,14 +14,7 @@ from redis import Redis
 from rq import Queue
 
 
-TELEGRAM_TOKEN = str(config("TELEGRAM_TOKEN"))
-TELEGRAM_CHAT_ID = str(config("TELEGRAM_CHAT_ID"))
 PORT_TO_RUN_UVICORN = int(config("PORT_TO_RUN_UVICORN"))
-
-
-def sendTelegramNotification(notification: str):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
-    requests.get(url).json()
 
 
 async def startPollingEndpoints(_endpoints):
