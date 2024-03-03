@@ -14,7 +14,7 @@ from fastapi import FastAPI, Request
 from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import declarative_base, mapped_column, relationship, Mapped, sessionmaker
 
-from test import count_words_at_url
+from redis_test_1 import count_words_at_url
 
 TELEGRAM_TOKEN = config("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID")
