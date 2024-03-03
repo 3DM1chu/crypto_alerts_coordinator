@@ -5,12 +5,12 @@ import orjson as json
 import main
 
 
-def count_words_at_url(url):
+def count_words_at_url(url, tokens):
     bro_datetime_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # Using underscores and dashes for file name
     file_name = f"{bro_datetime_str}.txt"
 
     with open(file_name, 'w') as file:
-        file.write(str(json.dumps(main.repo.tokens)))
+        file.write(str(json.dumps(tokens)))
 
     sleep(15)
 
@@ -18,6 +18,6 @@ def count_words_at_url(url):
     file_name = f"{bro_datetime_str}.txt"
 
     with open(file_name, 'w') as file:
-        file.write(str(json.dumps(main.repo.tokens)))
+        file.write(str(json.dumps(tokens)))
 
     return url
