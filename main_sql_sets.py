@@ -1,11 +1,13 @@
 import asyncio
-import json
+import pickle as json
 import multiprocessing
 import os.path
-import time
 from datetime import datetime, timedelta
 from multiprocessing import Process
+from time import sleep
 from typing import Set
+
+import redis
 import requests
 import uvicorn
 from decouple import config
@@ -281,6 +283,26 @@ if __name__ == "__main__":
 
     tokens: Set[Token] = set(session.query(Token).all())
     print(f"Loaded {len(tokens)} tokens")
+
+
+    def count_words_at_url(url):
+        resp = requests.get(url)
+        sleep(15)
+        return len(resp.text.split())
+
+
+    from redis import Redis
+    from rq import Queue
+
+    redis_url = os.getenv('REDIS_URL')
+    if not redis_url:
+        raise RuntimeError("Set up Heroku Data For Redis first, \
+        make sure its config var is named 'REDIS_URL'.")
+
+    conn = redis.from_url("redis://localhost:6379")
+
+    q = Queue(connection=Redis())
+    result = q.enqueue(count_words_at_url, args='http://nvie.com', on_success = print("DONE"))
 
     manager = multiprocessing.Manager()
     endpoints = manager.list()

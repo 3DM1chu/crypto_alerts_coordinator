@@ -10,3 +10,5 @@ uvicorn
 fastapi
 sqlalchemy
 sqlalchemy[mypy]
+redis
+rq
