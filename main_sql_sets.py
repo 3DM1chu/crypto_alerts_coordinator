@@ -264,6 +264,13 @@ def migrateJSONtoDB():
         session.commit()
 
 
+
+def count_words_at_url(url):
+    resp = requests.get(url)
+    sleep(15)
+    return len(resp.text.split())
+
+
 if __name__ == "__main__":
     if not os.path.exists("database.db"):
         # Migrate from json
@@ -283,12 +290,6 @@ if __name__ == "__main__":
 
     tokens: Set[Token] = set(session.query(Token).all())
     print(f"Loaded {len(tokens)} tokens")
-
-
-    def count_words_at_url(url):
-        resp = requests.get(url)
-        sleep(15)
-        return len(resp.text.split())
 
 
     from redis import Redis
