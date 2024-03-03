@@ -208,7 +208,7 @@ async def startPollingEndpoints(_endpoints):
 
 
 def setup_endpoints(_endpoints):
-    coins_to_check = json.loads(open("coins.json", "r").read())
+    coins_to_check = json.loads(open("../coins.json", "r").read())
     _endpoints.append({"url": "http://frog01.mikr.us:21591/putToken/", "tokens":
                       [coin_from_file["symbol"] for coin_from_file in coins_to_check]})
     asyncio.run(startPollingEndpoints(_endpoints))
@@ -238,11 +238,11 @@ async def addTokenToCheck(request: Request):
 
 
 def migrateJSONtoDB():
-    if not os.path.exists("prices.json"):
-        file = open("prices.json", 'w')
+    if not os.path.exists("../prices.json"):
+        file = open("../prices.json", 'w')
         file.write("[]")
         file.close()
-    _tokens: [] = json.loads(open("prices.json", "r").read())
+    _tokens: [] = json.loads(open("../prices.json", "r").read())
     for token_from_file in _tokens:
         __token = Token(symbol=token_from_file["symbol"])
         __token.currency = token_from_file["currency"]
@@ -257,7 +257,7 @@ def migrateJSONtoDB():
 
 
 if __name__ == "__main__":
-    if not os.path.exists("database.db"):
+    if not os.path.exists("../database.db"):
         # Migrate from json
         engine = create_engine("sqlite:///database.db")
         Base.metadata.create_all(engine)

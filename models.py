@@ -1,23 +1,12 @@
-import asyncio
-import orjson as json
-import multiprocessing
-import os.path
+import os
 from datetime import datetime, timedelta
-from multiprocessing import Process
 from typing import Set
-
-import redis
-import requests
-import uvicorn
+import orjson as json
 from decouple import config
-from fastapi import FastAPI, Request
-from sqlalchemy import create_engine, Column, Integer, Float, String, ForeignKey
-from sqlalchemy.orm import declarative_base, mapped_column, relationship, Mapped, sessionmaker
+from sqlalchemy import Column, Integer, ForeignKey, Float, String, create_engine
+from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship, sessionmaker
 
-from redis_test_1 import count_words_at_url
-
-TELEGRAM_TOKEN = config("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = config("TELEGRAM_CHAT_ID")
+from main import sendTelegramNotification
 
 MINIMUM_PRICE_CHANGE_TO_ALERT_5M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_5M"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_15M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_15M"))
@@ -28,14 +17,7 @@ MINIMUM_PRICE_CHANGE_TO_ALERT_24H = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_
 MINIMUM_PRICE_CHANGE_TO_ALERT_7D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_7D"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_30D = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_30D"))
 
-PORT_TO_RUN_UVICORN = int(config("PORT_TO_RUN_UVICORN"))
-
 Base = declarative_base()
-
-
-def sendTelegramNotification(notification: str):
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
-    requests.get(url).json()
 
 
 class BaseModel(Base):
@@ -72,7 +54,7 @@ class Token(BaseModel):
         # print(last.price)
         return last.price if last is not None else 0.0
 
-    def addPriceEntry(self, price: float, _datetime: datetime):
+    def addPriceEntry(self, price: float, _datetime: datetime, session):
         if self.getCurrentPrice() == price:
             return
         new_token_price = TokenPrice(price=price, datetime=_datetime)
@@ -197,106 +179,60 @@ class Token(BaseModel):
         return result
 
 
-def findToken(symbol: str):
-    _id: int = 0
-    for entry in tokens:
-        if entry.symbol == symbol:
-            return entry, _id
-        _id += 1
-    return None, -1
+class Repository:
+    def __init__(self):
+        self.session = None
+        self.tokens: Set[Token] = set()
 
+    def addNewToken(self, symbol: str):
+        newToken = Token(symbol)
+        self.session.add(newToken)
+        self.tokens.add(newToken)
+        self.session.commit()
+        return newToken
 
-async def startPollingEndpoints(_endpoints):
-    while True:
-        for endpoint in _endpoints:
-            for token_in_endpoint in endpoint["tokens"]:
+    def findToken(self, symbol: str):
+        _id: int = 0
+        for entry in self.tokens:
+            if entry.symbol == symbol:
+                return entry, _id
+            _id += 1
+        return None, -1
+
+    def initializeDB(self):
+        if not os.path.exists("database.db"):
+            # Migrate from json
+            engine = create_engine("sqlite:///database.db")
+            Base.metadata.create_all(engine)
+            self.session = sessionmaker(bind=engine)()
+
+            print("Starting to migrate from JSON to SQLite")
+            time_start = datetime.now()
+            self.migrateJSONtoDB()
+            time_end = datetime.now()
+            print(f"Migration completed... Took {time_end - time_start}")
+        else:
+            engine = create_engine("sqlite:///database.db")
+            Base.metadata.create_all(engine)
+            self.session = sessionmaker(bind=engine)()
+
+        self.tokens = set(self.session.query(Token).all())
+        print(f"Loaded {len(self.tokens)} tokens")
+
+    def migrateJSONtoDB(self):
+        if not os.path.exists("prices.json"):
+            file = open("prices.json", 'w')
+            file.write("[]")
+            file.close()
+        _tokens: [] = json.loads(open("prices.json", "r").read())
+        for token_from_file in _tokens:
+            __token = Token(symbol=token_from_file["symbol"])
+            __token.currency = token_from_file["currency"]
+            for price_history_entry in token_from_file["price_history"]:
                 try:
-                    requests.put(endpoint["url"] + token_in_endpoint)
-                    # print("Connected to endpoint: " + endpoint["url"])
+                    timestamp = price_history_entry["datetime"]
                 except:
-                    x = ""
-        await asyncio.sleep(120)
-
-
-def setup_endpoints(_endpoints: list):
-    coins_to_check = json.loads(open("coins.json", "r").read())
-    _endpoints.append({"url": "http://frog01.mikr.us:21591/putToken/", "tokens":
-                      [coin_from_file["symbol"] for coin_from_file in coins_to_check]})
-    asyncio.run(startPollingEndpoints(_endpoints))
-
-
-app = FastAPI()
-
-
-@app.post("/addTokenPrice")
-async def addTokenToCheck(request: Request):
-    json_data = await request.json()
-    # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
-    symbol = str(json_data["symbol"])
-    current_price = float(json_data["current_price"])
-    current_time = datetime.strptime(str(json_data["current_time"]), "%Y-%m-%d %H:%M:%S")
-    token_found, _ = findToken(symbol)
-    if token_found is None:
-        token_found = Token(symbol=symbol)
-        session.add(token_found)
-        tokens.add(token_found)
-        print(f"Added new token: {symbol}, current price: {current_time} at {current_time}")
-        session.commit()
-    token_found.addPriceEntry(current_price, current_time)
-    return {"response": "ok"}
-
-
-def migrateJSONtoDB():
-    if not os.path.exists("prices.json"):
-        file = open("prices.json", 'w')
-        file.write("[]")
-        file.close()
-    _tokens: [] = json.loads(open("prices.json", "r").read())
-    for token_from_file in _tokens:
-        __token = Token(symbol=token_from_file["symbol"])
-        __token.currency = token_from_file["currency"]
-        for price_history_entry in token_from_file["price_history"]:
-            try:
-                timestamp = price_history_entry["datetime"]
-            except:
-                timestamp = price_history_entry["timestamp"]
-            __token.token_prices.add(TokenPrice(price=price_history_entry["price"], datetime=timestamp))
-        session.add(__token)
-        session.commit()
-
-
-if __name__ == "__main__":
-    if not os.path.exists("database.db"):
-        # Migrate from json
-        engine = create_engine("sqlite:///database.db")
-        Base.metadata.create_all(engine)
-        session = sessionmaker(bind=engine)()
-
-        print("Starting to migrate from JSON to SQLite")
-        time_start = datetime.now()
-        migrateJSONtoDB()
-        time_end = datetime.now()
-        print(f"Migration completed... Took {time_end - time_start}")
-    else:
-        engine = create_engine("sqlite:///database.db")
-        Base.metadata.create_all(engine)
-        session = sessionmaker(bind=engine)()
-
-    tokens: Set[Token] = set(session.query(Token).all())
-    print(f"Loaded {len(tokens)} tokens")
-
-
-    from redis import Redis
-    from rq import Queue
-
-    conn = redis.from_url("redis://localhost:6379")
-
-    q = Queue(connection=Redis())
-    result = q.enqueue(count_words_at_url, 'http://nvie.com')
-
-    manager = multiprocessing.Manager()
-    endpoints = manager.list()
-    fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
-    fetcher_process.start()
-
-    uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
+                    timestamp = price_history_entry["timestamp"]
+                __token.token_prices.add(TokenPrice(price=price_history_entry["price"], datetime=timestamp))
+            self.session.add(__token)
+            self.session.commit()
