@@ -52,7 +52,7 @@ async def addTokenToCheck(request: Request):
     if token_found is None:
         token_found = repo.addNewToken(symbol)
         print(f"Added new token: {symbol}, current price: {current_time} at {current_time}")
-    token_found.addPriceEntry(current_price, current_time)
+    token_found.addPriceEntry(current_price, current_time, repo.session)
     return {"response": "ok"}
 
 
