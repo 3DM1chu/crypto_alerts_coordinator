@@ -12,3 +12,4 @@ sqlalchemy
 sqlalchemy[mypy]
 redis
 rq
+orjson

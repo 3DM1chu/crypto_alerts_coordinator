@@ -1,10 +1,9 @@
 import asyncio
-import pickle as json
+import orjson as json
 import multiprocessing
 import os.path
 from datetime import datetime, timedelta
 from multiprocessing import Process
-from time import sleep
 from typing import Set
 
 import redis
