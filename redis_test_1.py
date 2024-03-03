@@ -2,8 +2,6 @@ from datetime import datetime
 from time import sleep
 import orjson as json
 
-import main
-
 
 def count_words_at_url(url, tokens):
     bro_datetime_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")  # Using underscores and dashes for file name
