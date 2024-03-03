@@ -1,4 +1,6 @@
 import asyncio
+from time import sleep
+
 import orjson as json
 import multiprocessing
 from datetime import datetime
@@ -62,6 +64,8 @@ if __name__ == "__main__":
     q = Queue(connection=Redis())
     q.enqueue(count_words_at_url, args=('http://nvie.com', repo.tokens, set("ee")))
     print("FUCK QUEUES :DDD")
+    sleep(5)
+    print(len(repo.tokens))
     manager = multiprocessing.Manager()
     endpoints = manager.list()
     fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
