@@ -294,11 +294,6 @@ if __name__ == "__main__":
     from redis import Redis
     from rq import Queue
 
-    redis_url = os.getenv('REDIS_URL')
-    if not redis_url:
-        raise RuntimeError("Set up Heroku Data For Redis first, \
-        make sure its config var is named 'REDIS_URL'.")
-
     conn = redis.from_url("redis://localhost:6379")
 
     q = Queue(connection=Redis())
