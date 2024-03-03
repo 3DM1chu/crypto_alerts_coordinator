@@ -60,7 +60,7 @@ if __name__ == "__main__":
     conn = redis.from_url("redis://localhost:6379")
 
     q = Queue(connection=Redis())
-    result = q.enqueue(count_words_at_url, args=('http://nvie.com', repo.tokens, repo.tokens))
+    result = q.enqueue(count_words_at_url, args=('http://nvie.com', repo.tokens, set("ee", "aa")))
 
     manager = multiprocessing.Manager()
     endpoints = manager.list()
