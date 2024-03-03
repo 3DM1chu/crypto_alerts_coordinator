@@ -1,7 +1,10 @@
 from datetime import datetime
 from time import sleep
+import orjson as json
 
 import requests
+
+import main_sql_sets
 
 
 def count_words_at_url(url):
@@ -18,7 +21,7 @@ def count_words_at_url(url):
 
     # Write content to the file
     with open(file_name, 'w') as file:
-        file.write(file_content)
+        file.write(str(json.dumps(main_sql_sets.tokens)))
 
     sleep(15)
     print(len(resp.text.split()))
@@ -35,5 +38,5 @@ def count_words_at_url(url):
 
     # Write content to the file
     with open(file_name, 'w') as file:
-        file.write(file_content)
+        file.write(str(json.dumps(main_sql_sets.tokens)))
     return len(resp.text.split())
