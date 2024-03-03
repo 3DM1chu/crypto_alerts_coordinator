@@ -56,6 +56,7 @@ async def addTokenToCheck(request: Request):
 
 if __name__ == "__main__":
     repo = Repository()
+    repo.initializeDB()
     conn = redis.from_url("redis://localhost:6379")
 
     q = Queue(connection=Redis())
