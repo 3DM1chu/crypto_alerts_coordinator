@@ -88,12 +88,12 @@ class Token(BaseModel):
         self.checkIfPriceChanged(time_frame={"hours": 24},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H,
                                  _current_price=price, _current_datetime=_datetime)
-        self.checkIfPriceChanged(time_frame={"days": 7},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_7D,
-                                 _current_price=price, _current_datetime=_datetime)
-        self.checkIfPriceChanged(time_frame={"days": 30},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_30D,
-                                 _current_price=price, _current_datetime=_datetime)
+        #self.checkIfPriceChanged(time_frame={"days": 7},
+        #                         min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_7D,
+        #                         _current_price=price, _current_datetime=_datetime)
+        #self.checkIfPriceChanged(time_frame={"days": 30},
+        #                         min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_30D,
+        #                         _current_price=price, _current_datetime=_datetime)
 
     def getNearestPriceEntryToTimeframe(self, time_frame):
         # Parse current datetime
