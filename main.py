@@ -59,12 +59,12 @@ if __name__ == "__main__":
     repo.initializeDB()
     conn = redis.from_url("redis://localhost:6379")
 
-    q = Queue(connection=Redis())
-    q.enqueue(count_words_at_url, args=('http://nvie.com', repo.tokens, set("ee")))
+    #q = Queue(connection=Redis())
+    #q.enqueue(count_words_at_url, args=('http://nvie.com', repo.tokens, set("ee")))
 
     manager = multiprocessing.Manager()
     endpoints = manager.list()
     fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
     fetcher_process.start()
 
-    uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
+    uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="info")
