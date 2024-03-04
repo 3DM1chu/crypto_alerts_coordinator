@@ -26,7 +26,7 @@ def sendTelegramNotification(notification: str, ratio_if_higher_price=0.0, went_
     if went_up:
         format_to_add = "fix\n"
     else:
-        format_to_add = ""
+        format_to_add = "\n"
 
     # DISCORD
     url = ("https://discord.com/api/webhooks/1214234724902502482/"
