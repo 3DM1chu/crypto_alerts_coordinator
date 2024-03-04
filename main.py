@@ -67,4 +67,4 @@ if __name__ == "__main__":
     fetcher_process = Process(target=setup_endpoints, args=(endpoints,))
     fetcher_process.start()
 
-    uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=PORT_TO_RUN_UVICORN, log_level="error")
