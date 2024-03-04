@@ -144,8 +144,7 @@ class Token(BaseModel):
                             f"{historic_price} => {_current_price}$\n"
                             f"ATH in {time_frame}\n"
                             f"📗{price_change}%\n"
-                            f"{historic_price_timestamp} | {_current_datetime}\n"
-                            f"======================")
+                            f"{historic_price_timestamp} | {_current_datetime}")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification, price_change >= 2 * min_price_change_percent)
         elif _current_price < historic_price and wasATL:
@@ -156,8 +155,7 @@ class Token(BaseModel):
                             f"{historic_price} => {_current_price}$\n"
                             f"ATL in {time_frame}\n"
                             f"📉{price_change}%\n"
-                            f"{historic_price_timestamp} | {_current_datetime}\n"
-                            f"======================")
+                            f"{historic_price_timestamp} | {_current_datetime}\n")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification,  price_change >= 2 * min_price_change_percent)
         else:
