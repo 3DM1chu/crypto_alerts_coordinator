@@ -23,6 +23,7 @@ Base = declarative_base()
 
 
 def sendTelegramNotification(notification: str, ratio_if_higher_price=0.0):
+    ratio_if_higher_price = abs(ratio_if_higher_price)
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
     requests.get(url).json()
     url = ("https://discord.com/api/webhooks/1214234724902502482/"
