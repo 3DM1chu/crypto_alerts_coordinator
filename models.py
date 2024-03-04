@@ -22,25 +22,24 @@ TELEGRAM_CHAT_ID = str(config("TELEGRAM_CHAT_ID"))
 Base = declarative_base()
 
 
-def sendTelegramNotification(notification: str, ratio_if_higher_price=0.0):
-    went_up = ratio_if_higher_price > 0
+def sendTelegramNotification(notification: str, ratio_if_higher_price=0.0, went_up=True):
     if went_up:
-        format_to_add = "bash"
+        format_to_add = "fix\n"
     else:
-        format_to_add = "arm"
+        format_to_add = ""
 
     # DISCORD
     url = ("https://discord.com/api/webhooks/1214234724902502482/"
            "Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI")
-    requests.post(url, data={"content": f"```{format_to_add} {notification}```"})
+    requests.post(url, data={"content": f"```{format_to_add}{notification}```"})
     if 2.0 <= ratio_if_higher_price < 3:
         url = ("https://discord.com/api/webhooks/1214260685245251667/"
                "e1DgPPFPdTF8kAPZwrw6Tpwslv0ATLLl8UZTIhBoFgquj5AeyoFXtzsPwZIIimSvKmiY")
-        requests.post(url, data={"content": f"```{format_to_add} {notification}```"})
+        requests.post(url, data={"content": f"```{format_to_add}{notification}```"})
     elif ratio_if_higher_price >= 3:
         url = ("https://discord.com/api/webhooks/1214262555338604584/"
                "dDW94T66wgX9FMZb9eGo-ZEdLptoaSukFTQWoOJc1edkaowcGHk1SukElO1uFNL0wXMf")
-        requests.post(url, data={"content": f"```{format_to_add} {notification}```"})
+        requests.post(url, data={"content": f"```{format_to_add}{notification}```"})
 
     # TELEGRAM
     _notification = f"======================\n" + notification
@@ -161,7 +160,7 @@ class Token(BaseModel):
                             f"{historic_price_timestamp} | {_current_datetime}")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification,
-                                         float(price_change / min_price_change_percent))
+                                         float(price_change / min_price_change_percent), True)
         elif _current_price < historic_price and wasATL:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
@@ -172,7 +171,7 @@ class Token(BaseModel):
                             f"{historic_price_timestamp} | {_current_datetime}\n")
             if price_change >= min_price_change_percent:
                 sendTelegramNotification(notification,
-                                         float(price_change / min_price_change_percent))
+                                         float(price_change / min_price_change_percent), False)
         else:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
