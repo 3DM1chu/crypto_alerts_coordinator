@@ -25,6 +25,8 @@ Base = declarative_base()
 def sendTelegramNotification(notification: str):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
     requests.get(url).json()
+    url = f"https://discord.com/api/webhooks/1214234724902502482/Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI"
+    requests.post(url, data=notification)
 
 
 class BaseModel(Base):
