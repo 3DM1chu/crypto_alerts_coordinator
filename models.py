@@ -94,6 +94,9 @@ class Token(BaseModel):
         self.checkIfPriceChanged(time_frame={"minutes": 15},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M,
                                  _current_price=price, _current_datetime=_datetime)
+        self.checkIfPriceChanged(time_frame={"minutes": 30},
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M,
+                                 _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"hours": 1},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_1H,
                                  _current_price=price, _current_datetime=_datetime)
