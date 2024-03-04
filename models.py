@@ -25,11 +25,13 @@ Base = declarative_base()
 def sendTelegramNotification(notification: str, higher_price=False):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
     requests.get(url).json()
-    url = "https://discord.com/api/webhooks/1214234724902502482/Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI"
-    requests.post(url, data={"content": notification})
+    url = ("https://discord.com/api/webhooks/1214234724902502482/"
+           "Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI")
+    requests.post(url, data={"content": f"```{notification}```"})
     if higher_price:
-        url = "https://discord.com/api/webhooks/1214260685245251667/e1DgPPFPdTF8kAPZwrw6Tpwslv0ATLLl8UZTIhBoFgquj5AeyoFXtzsPwZIIimSvKmiY"
-        requests.post(url, data={"content": notification})
+        url = ("https://discord.com/api/webhooks/1214260685245251667/"
+               "e1DgPPFPdTF8kAPZwrw6Tpwslv0ATLLl8UZTIhBoFgquj5AeyoFXtzsPwZIIimSvKmiY")
+        requests.post(url, data={"content": f"```{notification}```"})
 
 
 class BaseModel(Base):
