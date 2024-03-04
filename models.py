@@ -152,8 +152,7 @@ class Token(BaseModel):
         if _current_price > historic_price and wasATH:
             price_change = (_current_price / historic_price * 100) - 100
             price_change = float("{:.3f}".format(price_change))
-            notification = (f"======================\n"
-                            f"{self.symbol}\n"
+            notification = (f"{self.symbol}\n"
                             f"{historic_price} => {_current_price}$\n"
                             f"ATH in {time_frame}\n"
                             f"📗{price_change}%\n"
