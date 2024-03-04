@@ -22,11 +22,14 @@ TELEGRAM_CHAT_ID = str(config("TELEGRAM_CHAT_ID"))
 Base = declarative_base()
 
 
-def sendTelegramNotification(notification: str):
+def sendTelegramNotification(notification: str, higher_price=False):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
     requests.get(url).json()
-    url = f"https://discord.com/api/webhooks/1214234724902502482/Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI"
+    url = "https://discord.com/api/webhooks/1214234724902502482/Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI"
     requests.post(url, data={"content": notification})
+    if higher_price:
+        url = "https://discord.com/api/webhooks/1214260685245251667/e1DgPPFPdTF8kAPZwrw6Tpwslv0ATLLl8UZTIhBoFgquj5AeyoFXtzsPwZIIimSvKmiY"
+        requests.post(url, data={"content": notification})
 
 
 class BaseModel(Base):
@@ -142,7 +145,7 @@ class Token(BaseModel):
                             f"{historic_price_timestamp} | {_current_datetime}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
-                sendTelegramNotification(notification)
+                sendTelegramNotification(notification, price_change >= 2 * min_price_change_percent)
         elif _current_price < historic_price and wasATL:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
@@ -154,7 +157,7 @@ class Token(BaseModel):
                             f"{historic_price_timestamp} | {_current_datetime}\n"
                             f"======================")
             if price_change >= min_price_change_percent:
-                sendTelegramNotification(notification)
+                sendTelegramNotification(notification,  price_change >= 2 * min_price_change_percent)
         else:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
