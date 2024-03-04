@@ -25,22 +25,22 @@ Base = declarative_base()
 def sendTelegramNotification(notification: str, ratio_if_higher_price=0.0):
     went_up = ratio_if_higher_price > 0
     if went_up:
-        format_to_add = "diff"
+        format_to_add = "bash"
     else:
         format_to_add = "arm"
 
     # DISCORD
     url = ("https://discord.com/api/webhooks/1214234724902502482/"
            "Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI")
-    requests.post(url, data={"content": f"```{format_to_add}{notification}```"})
+    requests.post(url, data={"content": f"```{format_to_add} {notification}```"})
     if 2.0 <= ratio_if_higher_price < 3:
         url = ("https://discord.com/api/webhooks/1214260685245251667/"
                "e1DgPPFPdTF8kAPZwrw6Tpwslv0ATLLl8UZTIhBoFgquj5AeyoFXtzsPwZIIimSvKmiY")
-        requests.post(url, data={"content": f"```{format_to_add}{notification}```"})
+        requests.post(url, data={"content": f"```{format_to_add} {notification}```"})
     elif ratio_if_higher_price >= 3:
         url = ("https://discord.com/api/webhooks/1214262555338604584/"
                "dDW94T66wgX9FMZb9eGo-ZEdLptoaSukFTQWoOJc1edkaowcGHk1SukElO1uFNL0wXMf")
-        requests.post(url, data={"content": f"```{format_to_add}{notification}```"})
+        requests.post(url, data={"content": f"```{format_to_add} {notification}```"})
 
     # TELEGRAM
     _notification = f"======================\n" + notification
