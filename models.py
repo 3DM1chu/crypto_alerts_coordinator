@@ -194,7 +194,7 @@ class Repository:
         self.tokens: Set[Token] = set()
 
     def addNewToken(self, symbol: str):
-        newToken = Token(symbol)
+        newToken = Token(symbol=symbol)
         self.session.add(newToken)
         self.tokens.add(newToken)
         self.session.commit()
