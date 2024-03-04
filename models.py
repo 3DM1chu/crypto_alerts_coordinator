@@ -26,6 +26,10 @@ def sendTelegramNotification(notification: str, ratio_if_higher_price=0.0):
     ratio_if_higher_price = abs(ratio_if_higher_price)
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={notification}"
     requests.get(url).json()
+
+    # DISCORD
+    notification = f"======================\n" + notification
+
     url = ("https://discord.com/api/webhooks/1214234724902502482/"
            "Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI")
     requests.post(url, data={"content": f"```{notification}```"})
@@ -156,8 +160,7 @@ class Token(BaseModel):
         elif _current_price < historic_price and wasATL:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
-            notification = (f"======================\n"
-                            f"{self.symbol}\n"
+            notification = (f"{self.symbol}\n"
                             f"{historic_price} => {_current_price}$\n"
                             f"ATL in {time_frame}\n"
                             f"📉{price_change}%\n"
@@ -168,8 +171,7 @@ class Token(BaseModel):
         else:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
-            notification = (f"======================\n"
-                            f"{self.symbol}\n"
+            notification = (f"{self.symbol}\n"
                             f"📉{price_change}%\n"
                             f"{historic_price} => {_current_price}$\n"
                             f"{historic_price_timestamp} | {_current_datetime}\n"
