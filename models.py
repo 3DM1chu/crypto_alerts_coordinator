@@ -9,6 +9,7 @@ from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship
 
 MINIMUM_PRICE_CHANGE_TO_ALERT_5M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_5M"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_15M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_15M"))
+MINIMUM_PRICE_CHANGE_TO_ALERT_30M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_30M"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_1H = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_1H"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_4H = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_4H"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_8H = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_8H"))
@@ -95,7 +96,7 @@ class Token(BaseModel):
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M,
                                  _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"minutes": 30},
-                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_15M,
+                                 min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_30M,
                                  _current_price=price, _current_datetime=_datetime)
         self.checkIfPriceChanged(time_frame={"hours": 1},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_1H,
