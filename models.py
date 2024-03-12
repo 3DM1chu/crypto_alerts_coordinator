@@ -279,8 +279,7 @@ class Token(BaseModel):
             notification = (f"{self.symbol}\n"
                             f"is near price level {price_level}$\n"
                             f"Current price: {_current_price}$\n"
-                            f"{historic_price_timestamp}\n"
-                            f"======================")
+                            f"{historic_price_timestamp}")
             notification_to_send = {
                 "notification_text": notification,
                 "notification_type": "price_level",
