@@ -65,7 +65,7 @@ types: [price_change, price_level]
 
 
 def sendNotification(notification_dict: {}):
-    notification_text, notification_type, extra = notification_dict
+    notification_text, notification_type, extra = notification_dict.values()
     if notification_type == "price_change":
         if extra["went_up"]:
             format_to_add = "fix\n"
