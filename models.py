@@ -283,7 +283,7 @@ class Token(BaseModel):
                             f"======================")
             notification_to_send = {
                 "notification_text": notification,
-                "notification_type": "price_alert",
+                "notification_type": "price_level",
                 "extra": {}
             }
             sendNotification(notification_to_send)
