@@ -277,8 +277,8 @@ class Token(BaseModel):
         result_is_true, price_level = checkIfPriceIsAroundPriceLevel(str(self.symbol), _current_price, 0.02).values()
         if result_is_true:
             notification = (f"{self.symbol}\n"
-                            f"Went to the price level\n"
-                            f"{price_level}$\n"
+                            f"is near price level {price_level}$\n"
+                            f"Current price: {_current_price}$\n"
                             f"{historic_price_timestamp}\n"
                             f"======================")
             notification_to_send = {
