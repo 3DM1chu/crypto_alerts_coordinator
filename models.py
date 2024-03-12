@@ -7,6 +7,32 @@ from decouple import config
 from sqlalchemy import Column, Integer, ForeignKey, Float, String, create_engine
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, relationship, sessionmaker
 
+
+def getPriceLevels(token_to_find: str):
+    price_levels = json.loads(open("price_levels.json", "r").read())
+    for token in price_levels:
+        token_price_levels = [float(token_price_level) for token_price_level in price_levels[token]]
+        if token == token_to_find:
+            return token_price_levels
+
+
+def checkIfPriceIsAroundPriceLevel(token_to_find: str, current_price: float, max_change: float = 0.01):
+    # max_change = 1 -> 100%
+    price_levels = getPriceLevels(token_to_find)
+    if len(price_levels) > 0:
+        for price_level in price_levels:
+            if price_level * float(1 - max_change) < current_price < price_level * float(1 + max_change):
+                print(price_level)
+                return {
+                    "result": True,
+                    "price_level": price_level
+                }
+    return {
+        "result": False,
+        "price_level": 0.0
+    }
+
+
 MINIMUM_PRICE_CHANGE_TO_ALERT_5M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_5M"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_15M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_15M"))
 MINIMUM_PRICE_CHANGE_TO_ALERT_30M = float(config("MINIMUM_PRICE_CHANGE_TO_ALERT_30M"))
@@ -22,8 +48,53 @@ TELEGRAM_CHAT_ID = str(config("TELEGRAM_CHAT_ID"))
 
 Base = declarative_base()
 
+"""
+{
+ "notification_text": "bla bla bla",
+ "notification_type": "price_change",
+ "extra":{
+  "ratio_if_higher_price": 3.0,
+  "went_up": False
+ }
+}
 
-def sendTelegramNotification(notification: str, ratio_if_higher_price=0.0, went_up=True):
+extra can be empty
+types: [price_change, price_level]
+"""
+
+
+def sendNotification(notification_dict: {}):
+    notification_text, notification_type, extra = notification_dict
+    if notification_type == "price_change":
+        if extra["went_up"]:
+            format_to_add = "fix\n"
+        else:
+            format_to_add = "\n"
+        ratio_if_higher_price = float(extra["ratio_if_higher_price"])
+
+        # DISCORD
+        url = ("https://discord.com/api/webhooks/1214234724902502482/"
+               "Mxz0D4ah2vplk_2_RmbnROkDeR5fcwArjE8Y6iERFoAD8YftfwgQtaoBl6M_CIgctRfI")
+        requests.post(url, data={"content": f"```{format_to_add}{notification_text}```"})
+        if 2.0 <= ratio_if_higher_price < 3:
+            url = ("https://discord.com/api/webhooks/1214260685245251667/"
+                   "e1DgPPFPdTF8kAPZwrw6Tpwslv0ATLLl8UZTIhBoFgquj5AeyoFXtzsPwZIIimSvKmiY")
+            requests.post(url, data={"content": f"```{format_to_add}{notification_text}```"})
+        elif ratio_if_higher_price >= 3:
+            url = ("https://discord.com/api/webhooks/1214262555338604584/"
+                   "dDW94T66wgX9FMZb9eGo-ZEdLptoaSukFTQWoOJc1edkaowcGHk1SukElO1uFNL0wXMf")
+            requests.post(url, data={"content": f"```{format_to_add}{notification_text}```"})
+
+    elif notification_type == "price_level":
+        url = ("https://discord.com/api/webhooks/1217248564540084314/"
+               "8qt6adXJzUtew5K_Et0pGoQ87JLiBE0pWLgEjce5dJGlv4KYagNROJUmSOLuPntbc-Dj")
+        requests.post(url, data={"content": f"```fix\n{notification_text}```"})
+    else:
+        print(f"Dont know type: {notification_type}")
+        return
+
+
+def deprecated_sendTelegramNotification(notification: str, ratio_if_higher_price=0.0, went_up=True):
     if went_up:
         format_to_add = "fix\n"
     else:
@@ -110,10 +181,10 @@ class Token(BaseModel):
         self.checkIfPriceChanged(time_frame={"hours": 24},
                                  min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_24H,
                                  _current_price=price, _current_datetime=_datetime)
-        #self.checkIfPriceChanged(time_frame={"days": 7},
+        # self.checkIfPriceChanged(time_frame={"days": 7},
         #                         min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_7D,
         #                         _current_price=price, _current_datetime=_datetime)
-        #self.checkIfPriceChanged(time_frame={"days": 30},
+        # self.checkIfPriceChanged(time_frame={"days": 30},
         #                         min_price_change_percent=MINIMUM_PRICE_CHANGE_TO_ALERT_30D,
         #                         _current_price=price, _current_datetime=_datetime)
 
@@ -162,8 +233,16 @@ class Token(BaseModel):
                             f"📗{price_change}%\n"
                             f"{historic_price_timestamp} | {_current_datetime}")
             if price_change >= min_price_change_percent:
-                sendTelegramNotification(notification,
-                                         float(price_change / min_price_change_percent), True)
+                notification_to_send = {
+                    "notification_text": notification,
+                    "notification_type": "price_change",
+                    "extra": {
+                        "ratio_if_higher_price": float(price_change / min_price_change_percent),
+                        "went_up": True
+                    }
+                }
+                sendNotification(notification_to_send)
+
         elif _current_price < historic_price and wasATL:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
@@ -173,8 +252,15 @@ class Token(BaseModel):
                             f"📉{price_change}%\n"
                             f"{historic_price_timestamp} | {_current_datetime}\n")
             if price_change >= min_price_change_percent:
-                sendTelegramNotification(notification,
-                                         float(price_change / min_price_change_percent), False)
+                notification_to_send = {
+                    "notification_text": notification,
+                    "notification_type": "price_change",
+                    "extra": {
+                        "ratio_if_higher_price": float(price_change / min_price_change_percent),
+                        "went_up": False
+                    }
+                }
+                sendNotification(notification_to_send)
         else:
             price_change = 100 - (_current_price / historic_price * 100)
             price_change = float("{:.3f}".format(price_change))
@@ -185,6 +271,21 @@ class Token(BaseModel):
                             f"======================")
             if price_change >= min_price_change_percent:
                 print(notification)
+
+        # PRICE LEVEL CHECKS
+        result_is_true, price_level = checkIfPriceIsAroundPriceLevel(str(self.symbol), _current_price, 0.02).values()
+        if result_is_true:
+            notification = (f"{self.symbol}\n"
+                            f"Went to the price level\n"
+                            f"{price_level}$\n"
+                            f"{historic_price_timestamp}\n"
+                            f"======================")
+            notification_to_send = {
+                "notification_text": notification,
+                "notification_type": "price_alert",
+                "extra": {}
+            }
+            sendNotification(notification_to_send)
 
     def checkIfPriceWasATHorATL(self, time_delta, _current_price):
         # Define the time threshold (1 hour)
