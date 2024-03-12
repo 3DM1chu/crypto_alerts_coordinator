@@ -14,6 +14,7 @@ def getPriceLevels(token_to_find: str):
         token_price_levels = [float(token_price_level) for token_price_level in price_levels[token]]
         if token == token_to_find:
             return token_price_levels
+    return []
 
 
 def checkIfPriceIsAroundPriceLevel(token_to_find: str, current_price: float, max_change: float = 0.01):
