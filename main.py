@@ -31,7 +31,7 @@ async def startPollingEndpoints(_endpoints):
 
 def setup_endpoints(_endpoints: list):
     coins_to_check = json.loads(open("coins.json", "r").read())
-    _endpoints.append({"url": "http://95.217.89.204:21591/putToken/", "tokens":
+    _endpoints.append({"url": "http://95.217.89.204:3118/putToken/", "tokens":
                       [coin_from_file["symbol"] for coin_from_file in coins_to_check]})
     asyncio.run(startPollingEndpoints(_endpoints))
 
