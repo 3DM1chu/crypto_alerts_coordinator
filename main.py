@@ -60,6 +60,7 @@ app = FastAPI()
 @app.post("/addTokenPrice")
 async def addTokenToCheck(request: Request):
     json_data = await request.json()
+    print(json_data)
     # {'coin_name': 'LINA', 'current_price': 0.011833, 'current_time': '2024-03-01 16:57:42'}
     symbol = str(json_data["symbol"])
     current_price = float(json_data["current_price"])
