@@ -40,17 +40,19 @@ def setup_endpoints(_endpoints: list):
         return sublists
 
     # Split the data into 2 similar length lists
-    n = 2
-    sublists = split_list(coins_to_check, n)
+   # n = 1
+    #sublists = split_list(coins_to_check, n)
 
     # Print the sublists
-    for i, sublist in enumerate(sublists):
-        print(f"Sublist {i + 1}: {sublist}")
+    #for i, sublist in enumerate(sublists):
+        #print(f"Sublist {i + 1}: {sublist}")
 
-    urls = ["http://frog01.mikr.us:21591/putToken/", "http://95.217.89.204:3118/putToken/"]
+    #urls = ["http://frog01.mikr.us:21591/putToken/", "http://95.217.89.204:3118/putToken/"]
+    urls = ["http://frog01.mikr.us:21591/putToken/"]
     #urls = ["http://95.217.89.204:3118/putToken/"]
-    for i, url in enumerate(urls):
-        _endpoints.append({"url": url, "tokens": [coin_from_file["symbol"] for coin_from_file in sublists[i]]})
+    #for i, url in enumerate(urls):
+
+    _endpoints.append({"url": urls[0], "tokens": [coin_from_file["symbol"] for coin_from_file in coins_to_check]})
     asyncio.run(startPollingEndpoints(_endpoints))
 
 
